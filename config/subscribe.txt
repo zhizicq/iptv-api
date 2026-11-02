@@ -22,6 +22,16 @@ https://raw.githubusercontent.com/zhizicq/iptv-api/master/data/categories/%E6%95
 https://raw.githubusercontent.com/zhizicq/iptv-api/master/data/categories/%E7%9B%B4%E6%92%AD%E4%B8%AD%E5%9B%BD.m3u
 https://raw.githubusercontent.com/zhizicq/iptv-api/master/data/categories/%E8%A7%A3%E8%AF%B4%E9%A2%91%E9%81%93.m3u
 
+# 补充源 / Extra sources：公共仓库源，用于补齐央视与卫视覆盖；每条上方注释为实测用途与体量
+# vbskycn/iptv：央视与卫视覆盖最全的 IPv4 全量源，实测命中 42/43，约 101 KB / 441 条
+https://raw.githubusercontent.com/vbskycn/iptv/master/tv/iptv4.m3u
+# best-fan/iptv-sources：每日更新的精选源，实测命中 34/43，约 33 KB / 142 条
+https://raw.githubusercontent.com/best-fan/iptv-sources/main/cn_all.m3u8
+# fanmingming/live：央视全覆盖，实测命中 36/43，约 28 KB / 94 条
+https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/index.m3u
+# kimwang1978/collect-tv-txt lite：命中 43/43 但体量最大（约 1.1 MB / 7082 条），抓取与测速耗时明显增加，故放最后
+https://raw.githubusercontent.com/kimwang1978/collect-tv-txt/main/bbxx365_lite.m3u
+
 [WHITELIST]
 # 以下是订阅源的白名单，白名单内的订阅源获取的接口将不会参与测速，始终保留至结果最前。
 # This is the whitelist for subscription sources. Subscription sources in the whitelist will not participate in speed testing and will always be retained at the front of the results.
