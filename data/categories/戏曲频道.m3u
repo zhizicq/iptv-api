@@ -1,0 +1,4 @@
+#EXTM3U
+#EXTINF:-1 tvg-name="岭南戏曲" tvg-id="165" tvg-logo="https://tb.zbds.top/logo/岭南戏曲.png" group-title="戏曲频道", 岭南戏曲
+http://120.238.84.45:9901/tsfile/live/1095_1.m3u8?key=txiptv&playlive=1&authid=0
+updateTime: 2026-08-22 16:36:15

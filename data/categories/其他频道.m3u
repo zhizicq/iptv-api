@@ -1,0 +1,18 @@
+#EXTM3U
+#EXTINF:-1 tvg-name="游戏风云" tvg-id="游戏风云" tvg-logo="https://tb.zbds.top/logo/游戏风云.png" group-title="其他频道", 游戏风云
+http://1.197.203.33:85/tsfile/live/1117_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-name="金鹰纪实" tvg-id="金鹰纪实" tvg-logo="https://tb.zbds.top/logo/金鹰纪实.png" group-title="其他频道", 金鹰纪实
+http://1.197.203.33:85/tsfile/live/1116_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-name="书法频道" tvg-id="书法频道" tvg-logo="https://tb.zbds.top/logo/书法频道.png" group-title="其他频道", 书法频道
+http://1.197.203.33:85/tsfile/live/1005_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-name="动漫秀场" tvg-id="动漫秀场" tvg-logo="https://tb.zbds.top/logo/动漫秀场.png" group-title="其他频道", 动漫秀场
+http://1.197.203.33:85/tsfile/live/1099_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-name="国学频道" tvg-id="国学频道" tvg-logo="https://tb.zbds.top/logo/国学频道.png" group-title="其他频道", 国学频道
+http://1.197.203.33:85/tsfile/live/1118_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-name="文物宝库" tvg-id="文物宝库" tvg-logo="https://tb.zbds.top/logo/文物宝库.png" group-title="其他频道", 文物宝库
+http://1.197.203.33:85/tsfile/live/1108_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-name="梨园频道" tvg-id="梨园频道" tvg-logo="https://tb.zbds.top/logo/梨园频道.png" group-title="其他频道", 梨园频道
+http://1.197.203.33:85/tsfile/live/1102_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-name="生活时尚" tvg-id="生活时尚" tvg-logo="https://tb.zbds.top/logo/生活时尚.png" group-title="其他频道", 生活时尚
+http://1.197.203.33:85/tsfile/live/1112_1.m3u8?key=txiptv&playlive=1&authid=0
+updateTime: 2026-04-26 17:53:10
