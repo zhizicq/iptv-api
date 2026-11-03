@@ -44,7 +44,27 @@ stages:
           echo "ipv_type: $(grep -E '^ipv_type *=' config/config.ini)"
           echo "whitelist_entries: $(grep -vcE '^\s*(#|\[|$)' config/whitelist.txt || true)"
 
-          # 4) 完整更新（main.py 无命令行参数）
+          # 4) 清掉 Gitee runner 自带的同名环境变量：utils.config 会按 key / KEY / Section_key / SECTION_KEY
+          #    逐个覆盖配置（config.py:799-816），例如 LANGUAGE=en_US.UTF-8 会覆盖 language=zh_CN 导致校验失败
+          unset LANGUAGE || true
+          unset LANG || true
+          unset LC_ALL || true
+          unset language || true
+          unset Settings_language || true
+          unset SETTINGS_LANGUAGE || true
+          unset open_rtmp || true
+          unset OPEN_RTMP || true
+          unset Settings_open_rtmp || true
+          unset SETTINGS_OPEN_RTMP || true
+          unset PUBLIC_PORT || true
+          export PYTHONIOENCODING=utf-8
+          echo "LANGUAGE_AFTER=${LANGUAGE:-unset}"
+          if [ -n "${LANGUAGE:-}" ]; then echo "LANGUAGE_STILL_SET"; exit 1; fi
+
+          # 4.1) 配置预检：提前暴露仍被环境变量覆盖的配置项（失败即停，避免白跑一次全量生成）
+          python3 -c "import utils.config as c; over=sorted({str(v) for v in c.config._sources.values() if str(v).startswith('环境变量')}); print('ENV_OVERRIDES=' + (','.join(over) if over else 'none')); print('CONFIG_OK')"
+
+          # 4.2) 完整更新（main.py 无命令行参数）
           python3 main.py
 
           # 5) 产物校验
