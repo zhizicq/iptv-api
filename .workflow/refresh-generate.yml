@@ -1,98 +1,104 @@
-# Gitee Go 生成流水线：跑完整更新并把产物提交到 output 分支（全程不访问 GitHub）
-# 说明：stages 项下 name/displayName/strategy/trigger/steps 与 stage 同级（Gitee Go 要求）
-version: '1.0'
+version: "1.0"
 name: refresh-generate
 displayName: Refresh IPTV Results (Gitee output branch)
-
 stages:
-  - stage: generate
-    name: generate
-    displayName: 生成并发布
-    strategy: naturally
-    trigger: auto
-    steps:
-      - step: build@python
-        name: refresh_python
-        displayName: 生成 IPTV 结果并发布到 output 分支
-        pythonVersion: '3.9'
-        commands: |
-          set -e
-          echo "START_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          python3 --version
-
-          # 1) 先设国内源，再升级 pip（避免从 files.pythonhosted 慢速下载）
-          pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple || python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-          python3 -m pip install --upgrade pip
-
-          # 2) 依赖：pipenv 统一用 python3 -m pipenv（PATH 中没有 pipenv），优先导出 requirements
-          python3 -m pip install pipenv
-          if python3 -m pipenv lock --requirements > /tmp/req.txt 2>/tmp/pipenv-lock.log; then
-            echo "REQ_SOURCE=pipenv lock --requirements"
-          else
-            echo "PIPENV_LOCK_FAILED_FALLBACK=pipenv requirements"
-            tail -n 20 /tmp/pipenv-lock.log || true
-            python3 -m pipenv requirements > /tmp/req.txt
-            echo "REQ_SOURCE=pipenv requirements"
-          fi
-          echo "REQ_LINES=$(wc -l < /tmp/req.txt)"
-          python3 -m pip install -r /tmp/req.txt
-
-          # 3) 运行期参数（只改流水线工作区，绝不提交回 master）
-          sed -i 's/^open_rtmp *= *True/open_rtmp = False/' config/config.ini
-          echo "open_rtmp: $(grep -E '^open_rtmp *=' config/config.ini)"
-          echo "open_filter_resolution: $(grep -E '^open_filter_resolution *=' config/config.ini)"
-          echo "open_stream_screenshot: $(grep -E '^open_stream_screenshot *=' config/config.ini)"
-
-          # 4) 完整更新（main.py 无命令行参数）
-          python3 main.py
-
-          # 5) 产物校验
-          if [ ! -s output/result.m3u ]; then
-            echo "GENERATE_FAILED"
-            exit 1
-          fi
-          ls -l output/result.m3u output/result.txt output/ipv4.m3u output/ipv6.m3u
-          echo "RESULT_EXTINF=$(grep -c '^#EXTINF' output/result.m3u || true)"
-
-          # 6) 发布到 output 分支：凭据仅来自环境变量 TOKEN，绝不打印其值
-          if [ -z "${TOKEN}" ]; then
-            echo "TOKEN_MISSING"
-            exit 1
-          fi
-          PUB=/tmp/iptv-output
-          rm -rf "${PUB}"
-          mkdir -p "${PUB}"
-          cp output/result.m3u output/result.txt output/ipv4.m3u output/ipv6.m3u "${PUB}"/
-          GEN_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          cat > "${PUB}/README.md" <<EOF
-          # IPTV 结果（output 分支）
-
-          最近生成时间（UTC）：${GEN_UTC}
-
-          | 文件 | 直链（Gitee，仓库为私有需登录） |
-          | --- | --- |
-          | result.m3u | https://gitee.com/a3692602/iptv-api/raw/output/result.m3u |
-          | result.txt | https://gitee.com/a3692602/iptv-api/raw/output/result.txt |
-          | ipv4.m3u | https://gitee.com/a3692602/iptv-api/raw/output/ipv4.m3u |
-          | ipv6.m3u | https://gitee.com/a3692602/iptv-api/raw/output/ipv6.m3u |
-
-          分支浏览：https://gitee.com/a3692602/iptv-api/tree/output
-          EOF
-          cd "${PUB}"
-          git init -q
-          git config user.name "gitee-go"
-          git config user.email "gitee-go@users.noreply.gitee.com"
-          git checkout -q -b output
-          git add -f result.m3u result.txt ipv4.m3u ipv6.m3u README.md
-          git commit -q -m "chore: refresh iptv results at ${GEN_UTC}"
-          git remote add origin "https://a3692602:${TOKEN}@gitee.com/a3692602/iptv-api.git"
-          if git push -f origin output > /tmp/git-push.log 2>&1; then
-            echo "PUSHED_TO_OUTPUT_BRANCH"
-          else
-            sed "s|${TOKEN}|***|g" /tmp/git-push.log || true
-            echo "PUSH_FAILED"
-            exit 1
-          fi
-          git remote set-url origin "https://gitee.com/a3692602/iptv-api.git"
-          rm -f /tmp/git-push.log /tmp/pipenv-lock.log
-          echo "END_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+- name: 生成并发布
+  displayName: 生成并发布
+  strategy: naturally
+  trigger: auto
+  steps:
+  - step: build@python
+    name: refresh_python
+    displayName: 生成 IPTV 结果并发布到 output 分支
+    pythonVersion: "3.9"
+    commands:
+    - set -e
+    - echo "START_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    - python3 --version
+    - ""
+    - "# 1) 先设国内源，再升级 pip（避免从 files.pythonhosted 慢速下载）"
+    - pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple ||
+      python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+    - python3 -m pip install --upgrade pip
+    - ""
+    - "# 2) 依赖：pipenv 统一用 python3 -m pipenv（PATH 中没有 pipenv），优先导出 requirements"
+    - python3 -m pip install pipenv
+    - if python3 -m pipenv lock --requirements > /tmp/req.txt 2>/tmp/pipenv-lock.log;
+      then
+    - '  echo "REQ_SOURCE=pipenv lock --requirements"'
+    - else
+    - '  echo "PIPENV_LOCK_FAILED_FALLBACK=pipenv requirements"'
+    - '  tail -n 20 /tmp/pipenv-lock.log || true'
+    - '  python3 -m pipenv requirements > /tmp/req.txt'
+    - '  echo "REQ_SOURCE=pipenv requirements"'
+    - fi
+    - echo "REQ_LINES=$(wc -l < /tmp/req.txt)"
+    - python3 -m pip install -r /tmp/req.txt
+    - ""
+    - "# 3) 运行期参数（只改流水线工作区，绝不提交回 master）"
+    - sed -i 's/^open_rtmp *= *True/open_rtmp = False/' config/config.ini
+    - "echo \"open_rtmp: $(grep -E '^open_rtmp *=' config/config.ini)\""
+    - "echo \"open_filter_resolution: $(grep -E '^open_filter_resolution *=' config/config.ini)\""
+    - "echo \"open_stream_screenshot: $(grep -E '^open_stream_screenshot *=' config/config.ini)\""
+    - ""
+    - "# 4) 完整更新（main.py 无命令行参数）"
+    - python3 main.py
+    - ""
+    - "# 5) 产物校验"
+    - "if [ ! -s output/result.m3u ]; then"
+    - '  echo "GENERATE_FAILED"'
+    - '  exit 1'
+    - fi
+    - ls -l output/result.m3u output/result.txt output/ipv4.m3u output/ipv6.m3u
+    - echo "RESULT_EXTINF=$(grep -c '^#EXTINF' output/result.m3u || true)"
+    - ""
+    - "# 6) 发布到 output 分支：凭据仅来自环境变量 TOKEN，绝不打印其值"
+    - "if [ -z \"${TOKEN}\" ]; then"
+    - '  echo "TOKEN_MISSING"'
+    - '  exit 1'
+    - fi
+    - PUB=/tmp/iptv-output
+    - "rm -rf \"${PUB}\""
+    - "mkdir -p \"${PUB}\""
+    - "cp output/result.m3u output/result.txt output/ipv4.m3u output/ipv6.m3u \"${PUB}\"\
+      /"
+    - GEN_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    - "cat > \"${PUB}/README.md\" <<EOF"
+    - "# IPTV 结果（output 分支）"
+    - ""
+    - "最近生成时间（UTC）：${GEN_UTC}"
+    - ""
+    - '| 文件 | 直链（Gitee，仓库为私有需登录） |'
+    - '| --- | --- |'
+    - '| result.m3u | https://gitee.com/a3692602/iptv-api/raw/output/result.m3u |'
+    - '| result.txt | https://gitee.com/a3692602/iptv-api/raw/output/result.txt |'
+    - '| ipv4.m3u | https://gitee.com/a3692602/iptv-api/raw/output/ipv4.m3u |'
+    - '| ipv6.m3u | https://gitee.com/a3692602/iptv-api/raw/output/ipv6.m3u |'
+    - ""
+    - 分支浏览：https://gitee.com/a3692602/iptv-api/tree/output
+    - EOF
+    - "cd \"${PUB}\""
+    - git init -q
+    - git config user.name "gitee-go"
+    - git config user.email "gitee-go@users.noreply.gitee.com"
+    - git checkout -q -b output
+    - git add -f result.m3u result.txt ipv4.m3u ipv6.m3u README.md
+    - "git commit -q -m \"chore: refresh iptv results at ${GEN_UTC}\""
+    - "git remote add origin \"https://a3692602:${TOKEN}@gitee.com/a3692602/iptv-api.git\""
+    - if git push -f origin output > /tmp/git-push.log 2>&1; then
+    - '  echo "PUSHED_TO_OUTPUT_BRANCH"'
+    - else
+    - "  sed \"s|${TOKEN}|***|g\" /tmp/git-push.log || true"
+    - '  echo "PUSH_FAILED"'
+    - '  exit 1'
+    - fi
+    - git remote set-url origin "https://gitee.com/a3692602/iptv-api.git"
+    - rm -f /tmp/git-push.log /tmp/pipenv-lock.log
+    - echo "END_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+triggers:
+  trigger: manual
+notify: []
+variables:
+  TOKEN:
+    type: TEXT
+    default: e6897820c050dbad186f2944da5b3842
