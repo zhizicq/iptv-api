@@ -1,0 +1,13 @@
+# Gitee 侧白名单：故意保持为空
+#
+# 原因：
+#   1) Gitee Go 在国内网络下做「真实测速」（open_speed_test = True、open_filter_speed = True），
+#      白名单接口不参与测速且强制置顶，会架空测速、把不可用源带进结果。
+#   2) 本文件与 GitHub 侧的 config/whitelist.txt（378 条，永久展示）相互独立，请勿互相覆盖。
+#   3) 如确需为 Gitee 侧加入白名单，只改本文件，不影响 GitHub 侧。
+#
+# 维护规则见 docs/gitee-maintenance.md
+
+[WHITELIST]
+
+[KEYWORDS]

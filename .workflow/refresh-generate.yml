@@ -35,11 +35,14 @@ stages:
           fi
           python3 -c "import requests, aiohttp, bs4, m3u8, pytz, flask, rich, urllib3, opencc, ipdb; print('DEPS_IMPORT_OK')"
 
-          # 3) 运行期参数（只改流水线工作区，绝不提交回 master）
-          sed -i 's/^open_rtmp *= *True/open_rtmp = False/' config/config.ini
-          echo "open_rtmp: $(grep -E '^open_rtmp *=' config/config.ini)"
+          # 3) 覆盖为 Gitee 专用配置（真实测速、空白名单、无 ffmpeg），只改工作区不提交
+          cp config/config.gitee.ini config/config.ini
+          cp config/whitelist.gitee.txt config/whitelist.txt
+          echo "open_speed_test: $(grep -E '^open_speed_test *=' config/config.ini)"
+          echo "open_filter_speed: $(grep -E '^open_filter_speed *=' config/config.ini)"
           echo "open_filter_resolution: $(grep -E '^open_filter_resolution *=' config/config.ini)"
-          echo "open_stream_screenshot: $(grep -E '^open_stream_screenshot *=' config/config.ini)"
+          echo "ipv_type: $(grep -E '^ipv_type *=' config/config.ini)"
+          echo "whitelist_entries: $(grep -vcE '^\s*(#|\[|$)' config/whitelist.txt || true)"
 
           # 4) 完整更新（main.py 无命令行参数）
           python3 main.py
@@ -94,3 +97,7 @@ stages:
           git remote set-url origin "https://gitee.com/a3692602/iptv-api.git"
           rm -f /tmp/git-push.log
           echo "END_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+triggers:
+  trigger: manual
+notify: []
