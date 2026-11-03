@@ -1,12 +1,13 @@
 # Python 3.9 专用依赖清单（Gitee Go build@python 的版本上限就是 3.9）
 # 说明：Pipfile 中的版本面向 Python 3.14（如 rich 14.1.0 会拉 markdown-it-py>=2.2.0，
 #       而该依赖在 3.9 上无可解版本），因此 Gitee Go 侧改用本文件，不再经过 pipenv 解析。
-# 每一项都是「支持 Python 3.9 的最高可用版本」，取自 PyPI 各 release 的 requires_python。
+# 每一项都是「支持 Python 3.9 且实测可导入的版本」，主要由 PyPI 各 release 的 requires_python 决定，
+# 个别包（aiohttp）虽声明 >=3.9 但在 3.9.0 上不可用，已按实测降到 3.10.11。
 requests==2.32.5  # 3.9 可用的最高版；2.34.2 起 Requires-Python >=3.10
 bs4==0.0.2  # 元包，无 Requires-Python 限制，最新即 0.0.2
 rich==15.0.0  # 3.9 可用的最高版；15.0.0 声明 >=3.9.0
 async-timeout==5.0.1  # 最新且 >=3.8
-aiohttp==3.13.5  # 3.9 可用的最高版；3.14.x 起 Requires-Python >=3.10
+aiohttp==3.10.11  # 不用 3.12/3.13：其在 CPython 3.9.0 上 import 即报 TypeError: unhashable type: 'list'（TypedDict + typing.Optional[Sequence[...]]）；3.10.11 实测 3.9.0/3.9.13 均可导入
 opencc-python-reimplemented==0.1.7  # 最新且无 Requires-Python 限制
 gunicorn==23.0.0  # 3.9 可用的最高版（仅 service/app.py 需要，可选）；26.x 起 >=3.10
 m3u8==6.0.0  # 最新且 >=3.7
