@@ -1,41 +1,42 @@
 # Gitee Go 最小验证流水线：确认云端 Python 环境与依赖是否可用
-# 说明：Gitee Go 需在网页端「开通」后创建流水线，本文件才会被流水线引用；
-#       仅提交本文件不会自动创建流水线。
+# 说明：本文件为仓库内流水线定义（stages 项下 name/displayName/strategy/trigger/steps 与 stage 同级）
 version: '1.0'
 name: verify-py
 displayName: Verify Python Environment
 
 stages:
-  - stage:
-      name: verify
-      displayName: 环境验证
-      steps:
-        - step: build@python
-          name: verify_python
-          displayName: Python / 依赖 / FFmpeg 自检
-          pythonVersion: '3.9'
-          commands:
-            - echo "START_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            - echo "=== python version ==="
-            - python3 --version
-            - python3 -c "import sys; print('SYS_VERSION=' + sys.version.replace(chr(10), ' '))"
-            - echo "=== ffmpeg ==="
-            - command -v ffmpeg || echo "FFMPEG_MISSING"
-            - ffmpeg -version 2>&1 | head -n 2 || echo "FFMPEG_VERSION_FAILED"
-            - echo "=== pip / pipenv ==="
-            - python3 -m pip --version
-            - python3 -m pip install --upgrade pip || echo "PIP_UPGRADE_FAILED"
-            - pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple || echo "PIP_INDEX_SET_FAILED"
-            - python3 -m pip install pipenv || echo "PIPENV_INSTALL_FAILED"
-            - pipenv --version || echo "PIPENV_MISSING"
-            - echo "=== dependency install (non-blocking) ==="
-            - timeout 300 pipenv install --deploy || echo "PIPENV_DEPLOY_FAILED"
-            - if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt || echo "REQ_INSTALL_FAILED"; else echo "NO_REQUIREMENTS_TXT"; fi
-            - echo "=== minimal import check ==="
-            - python3 -c "import utils.config; print('IMPORT_OK')" || echo "IMPORT_FAILED"
-            - echo "=== syntax compile check (main.py has no CLI args, running it would start the full update) ==="
-            - python3 -m compileall -q utils scripts main.py && echo "COMPILE_OK" || echo "COMPILE_FAILED"
-            - echo "END_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  - stage: verify
+    name: verify
+    displayName: 环境验证
+    strategy: naturally
+    trigger: auto
+    steps:
+      - step: build@python
+        name: verify_python
+        displayName: Python / 依赖 / FFmpeg 自检
+        pythonVersion: 3.9
+        commands:
+          - echo "START_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          - echo "=== python version ==="
+          - python3 --version
+          - python3 -c "import sys; print('SYS_VERSION=' + sys.version.replace(chr(10), ' '))"
+          - echo "=== ffmpeg ==="
+          - command -v ffmpeg || echo "FFMPEG_MISSING"
+          - ffmpeg -version 2>&1 | head -n 2 || echo "FFMPEG_VERSION_FAILED"
+          - echo "=== pip / pipenv ==="
+          - python3 -m pip --version
+          - python3 -m pip install --upgrade pip || echo "PIP_UPGRADE_FAILED"
+          - pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple || echo "PIP_INDEX_SET_FAILED"
+          - python3 -m pip install pipenv || echo "PIPENV_INSTALL_FAILED"
+          - pipenv --version || echo "PIPENV_MISSING"
+          - echo "=== dependency install (non-blocking) ==="
+          - timeout 300 pipenv install --deploy || echo "PIPENV_DEPLOY_FAILED"
+          - if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt || echo "REQ_INSTALL_FAILED"; else echo "NO_REQUIREMENTS_TXT"; fi
+          - echo "=== minimal import check ==="
+          - python3 -c "import utils.config; print('IMPORT_OK')" || echo "IMPORT_FAILED"
+          - echo "=== syntax compile check (main.py has no CLI args, running it would start the full update) ==="
+          - python3 -m compileall -q utils scripts main.py && echo "COMPILE_OK" || echo "COMPILE_FAILED"
+          - echo "END_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 triggers:
   push:
