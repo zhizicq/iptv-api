@@ -32,6 +32,10 @@ https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/index.m3u
 # kimwang1978/collect-tv-txt lite：命中 43/43 但体量最大（约 1.1 MB / 7082 条），抓取与测速耗时明显增加，故放最后
 https://raw.githubusercontent.com/kimwang1978/collect-tv-txt/main/bbxx365_lite.m3u
 
+# 补充源 2 / Extra sources 2：2026-11-03 国内实测后新增（每条均实测 200 且 #EXTINF>0）
+# CCSH/IPTV：实测 200、4099 条 #EXTINF、约 1.09 MB；命中 40 个目标频道，国内 alive 率 13.9%（本轮新候选里唯一有正向收益）
+https://raw.githubusercontent.com/CCSH/IPTV/main/live.m3u
+
 [WHITELIST]
 # 以下是订阅源的白名单，白名单内的订阅源获取的接口将不会参与测速，始终保留至结果最前。
 # This is the whitelist for subscription sources. Subscription sources in the whitelist will not participate in speed testing and will always be retained at the front of the results.
