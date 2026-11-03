@@ -1,3 +1,6 @@
+
+from __future__ import annotations
+
 import math
 
 from utils.config import config, get_resolution_value

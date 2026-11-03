@@ -1,3 +1,6 @@
+
+from __future__ import annotations
+
 import ipaddress
 import time
 import xml.etree.ElementTree as ET

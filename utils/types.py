@@ -1,4 +1,13 @@
-from typing import TypedDict, Literal, Union, NotRequired
+
+from __future__ import annotations
+
+from typing import TypedDict, Literal, Union
+
+try:
+    from typing import NotRequired  # Python 3.11+
+except ImportError:  # Python 3.9 / 3.10: annotations are strings (PEP 563), so this is never evaluated
+    def NotRequired(annotation):
+        return annotation
 
 OriginType = Literal["hls", "local", "whitelist", "subscribe"]
 IPvType = Literal["ipv4", "ipv6", None]

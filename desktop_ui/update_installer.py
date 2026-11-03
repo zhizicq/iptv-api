@@ -1,5 +1,7 @@
 """Launch the external helper that replaces a frozen desktop build."""
 
+from __future__ import annotations
+
 import os
 import shutil
 import subprocess

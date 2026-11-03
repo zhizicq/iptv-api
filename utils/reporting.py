@@ -96,7 +96,7 @@ def normalize_message(value: str) -> str:
     return message
 
 
-@dataclass(slots=True)
+@dataclass(**({"slots": True} if sys.version_info >= (3, 10) else {}))
 class ReportEvent:
     event: str
     message: str

@@ -1,5 +1,7 @@
 """Standalone update helper. It must never run from the bundle it replaces."""
 
+from __future__ import annotations
+
 import argparse
 import hashlib
 import json

@@ -673,7 +673,7 @@ def print_channel_number(data: CategoryChannelData, cate: str, name: str, silent
     print("IPv4:", len([channel for channel in channel_list if channel["ipv_type"] == "ipv4"]), end=", ")
     print("IPv6:", len([channel for channel in channel_list if channel["ipv_type"] == "ipv6"]), end=", ")
     print(
-        f"{t("name.total")}:",
+        f'{t("name.total")}:',
         len(channel_list),
     )
 
@@ -738,7 +738,7 @@ def append_total_data(
                         ipv_type_data=url_hosts_ipv_type
                     )
                     if not reporter:
-                        print(f"{t(f"name.{method}")}:", len(name_results), end=", ")
+                        print(f'{t(f"name.{method}")}:', len(name_results), end=", ")
             print_channel_number(data, cate, name, silent=bool(reporter))
 
     if config.open_unmatch_category and subscribe_result:
@@ -995,8 +995,8 @@ async def test_speed(
                         continue
                     result = {}
                     try:
-                        async with asyncio.timeout(config.speed_test_timeout):
-                            result = await get_speed(
+                        result = await asyncio.wait_for(
+                            get_speed(
                                 info,
                                 headers=info.get("headers") or None,
                                 ipv6_proxy=ipv6_proxy_url,
@@ -1005,10 +1005,13 @@ async def test_speed(
                                 session=session,
                                 http_semaphore=http_semaphore,
                                 probe_semaphore=probe_semaphore,
-                            )
+                            ),
+                            timeout=config.speed_test_timeout,
+                        )
                     except asyncio.CancelledError:
                         task = asyncio.current_task()
-                        if task is not None and task.cancelling():
+                        cancelling = getattr(task, "cancelling", None)
+                        if task is not None and (cancelling() if cancelling is not None else True):
                             raise
                         result = {
                             "speed": 0,
@@ -1020,7 +1023,7 @@ async def test_speed(
                             "test_status": "request_error",
                             "error_type": "CancelledError",
                         }
-                    except TimeoutError:
+                    except asyncio.TimeoutError:
                         result = {
                             "speed": 0,
                             "delay": -1,
@@ -1306,7 +1309,7 @@ def process_write_content(
     open_url_info = config.open_url_info
     unmatch_category = t("content.unmatch_channel")
     for cate, channel_obj in data.items():
-        content += f"{'\n\n' if not first_cate else ''}{cate},#genre#"
+        content += ("\n\n" if not first_cate else "") + f"{cate},#genre#"
         first_cate = False
         channel_obj_keys = channel_obj.keys()
         for i, name in enumerate(channel_obj_keys):
@@ -1331,8 +1334,8 @@ def process_write_content(
                 total_item_url = f"{hls_url}/{item['id']}.m3u8" if hls_url else item_url
                 content += f"\n{name},{total_item_url}"
     if open_empty_category and no_result_name and is_last:
-        custom_print(f"\n{t("msg.no_result_channel")}")
-        content += f"\n\n{t("content.no_result_channel")},#genre#"
+        custom_print(f'\n{t("msg.no_result_channel")}')
+        content += f'\n\n{t("content.no_result_channel")},#genre#'
         for i, name in enumerate(no_result_name):
             end_char = ", " if i < len(no_result_name) - 1 else ""
             custom_print(name, end=end_char)
@@ -1381,7 +1384,7 @@ def process_write_content(
         update_time_extra_info = update_time_item.get("extra_info", "")
         if open_url_info and update_time_extra_info:
             update_time_item_url = add_url_info(update_time_item_url, update_time_extra_info)
-        value = f"{hls_url}/{update_time_item["id"]}.m3u8" if hls_url else update_time_item_url
+        value = f'{hls_url}/{update_time_item["id"]}.m3u8' if hls_url else update_time_item_url
         if config.update_time_position == "top":
             content = f"{update_title},#genre#\n{now},{value}\n\n{content}"
         else:
