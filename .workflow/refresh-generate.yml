@@ -24,18 +24,16 @@ stages:
           pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple || python3 -m pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
           python3 -m pip install --upgrade pip
 
-          # 2) 依赖：pipenv 统一用 python3 -m pipenv（PATH 中没有 pipenv），优先导出 requirements
-          python3 -m pip install pipenv
-          if python3 -m pipenv lock --requirements > /tmp/req.txt 2>/tmp/pipenv-lock.log; then
-            echo "REQ_SOURCE=pipenv lock --requirements"
+          # 2) 依赖：改用 3.9 专用清单（Pipfile 的版本面向 3.14，在 3.9 上无可解集）
+          #    先走清华源，失败自动切阿里云源重试一次
+          if python3 -m pip install -r requirements-py39.txt -i https://pypi.tuna.tsinghua.edu.cn/simple; then
+            echo "DEPS_SOURCE=tsinghua"
           else
-            echo "PIPENV_LOCK_FAILED_FALLBACK=pipenv requirements"
-            tail -n 20 /tmp/pipenv-lock.log || true
-            python3 -m pipenv requirements > /tmp/req.txt
-            echo "REQ_SOURCE=pipenv requirements"
+            echo "DEPS_TSINGHUA_FAILED_FALLBACK=aliyun"
+            python3 -m pip install -r requirements-py39.txt -i https://mirrors.aliyun.com/pypi/simple
+            echo "DEPS_SOURCE=aliyun"
           fi
-          echo "REQ_LINES=$(wc -l < /tmp/req.txt)"
-          python3 -m pip install -r /tmp/req.txt
+          python3 -c "import requests, aiohttp, bs4, m3u8, pytz, flask, rich, urllib3, opencc, ipdb; print('DEPS_IMPORT_OK')"
 
           # 3) 运行期参数（只改流水线工作区，绝不提交回 master）
           sed -i 's/^open_rtmp *= *True/open_rtmp = False/' config/config.ini
@@ -94,5 +92,5 @@ stages:
             exit 1
           fi
           git remote set-url origin "https://gitee.com/a3692602/iptv-api.git"
-          rm -f /tmp/git-push.log /tmp/pipenv-lock.log
+          rm -f /tmp/git-push.log
           echo "END_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
